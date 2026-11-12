@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Preuzimanje</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1b1f24;--muted:#5b6470;--accent:#1f6feb;--err:#cf222e;--line:#d0d7de}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b22;--text:#e6edf3;--muted:#9aa4af;--accent:#2f81f7;--err:#f85149;--line:#30363d}}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 system-ui,Segoe UI,sans-serif}
+main{max-width:480px;margin:64px auto;padding:0 16px}
+.card{background:var(--card);border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+h1{margin:0 0 16px;font-size:24px}
+input{box-sizing:border-box;width:100%;font-size:20px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);-webkit-text-security:disc}
+button{margin-top:12px;width:100%;border:0;background:var(--accent);color:#fff;font-weight:600;font-size:20px;padding:14px;border-radius:10px;cursor:pointer}
+#msg{min-height:24px;margin-top:12px;color:var(--muted)}
+#msg.err{color:var(--err)}
+ol{padding-left:20px;margin:20px 0 0;color:var(--muted)}
+</style>
+</head>
+<body>
+<main><div class="card">
+<h1>Preuzimanje</h1>
+<input id="pw" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Lozinka" aria-label="Lozinka">
+<button id="go">Preuzmi</button>
+<div id="msg"></div>
+<ol hidden id="steps">
+<li>Desni klik na skinuti ZIP → Extract All.</li>
+<li>Dvoklik na POSTAVI-SCAN-FOLDER-SAMOSTALNO-v3.bat i potvrdi UAC.</li>
+<li>Podatke iz UPUTE.txt upiši na kopirku (Address Book → SMB).</li>
+</ol>
+</div></main>
+<script>
+const pw=document.getElementById('pw'),msg=document.getElementById('msg');
+function say(t,e){msg.textContent=t;msg.className=e?'err':'';}
+async function go(){
+  if(!pw.value){say('Upiši lozinku.',1);return;}
+  say('Otključavam...');
+  try{
+    const buf=new Uint8Array(await (await fetch('scan.bin',{cache:'no-store'})).arrayBuffer());
+    const salt=buf.slice(0,16),iv=buf.slice(16,28),ct=buf.slice(28);
+    const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw.value),'PBKDF2',false,['deriveKey']);
+    const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:600000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+    let plain;
+    try{plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);}catch(e){say('Pogrešna lozinka.',1);return;}
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([plain],{type:'application/zip'}));
+    a.download='scan-folder-setup.zip';document.body.appendChild(a);a.click();a.remove();
+    pw.value='';say('Preuzimanje je krenulo.');document.getElementById('steps').hidden=false;
+  }catch(e){say('Greška pri preuzimanju. Pokušaj ponovno.',1);}
+}
+document.getElementById('go').onclick=go;
+pw.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+</script>
+</body>
+</html>
