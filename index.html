@@ -14,6 +14,8 @@ main{max-width:480px;margin:64px auto;padding:0 16px}
 h1{margin:0 0 16px;font-size:24px}
 input{box-sizing:border-box;width:100%;font-size:20px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);-webkit-text-security:disc}
 button{margin-top:12px;width:100%;border:0;background:var(--accent);color:#fff;font-weight:600;font-size:20px;padding:14px;border-radius:10px;cursor:pointer}
+a.dl{display:block;margin-top:12px;text-align:center;background:#1a7f37;color:#fff;text-decoration:none;font-weight:600;font-size:20px;padding:14px;border-radius:10px}
+a.dl[hidden]{display:none}
 #msg{min-height:24px;margin-top:12px;color:var(--muted)}
 #msg.err{color:var(--err)}
 ol{padding-left:20px;margin:20px 0 0;color:var(--muted)}
@@ -23,8 +25,9 @@ ol{padding-left:20px;margin:20px 0 0;color:var(--muted)}
 <main><div class="card">
 <h1>Preuzimanje</h1>
 <input id="pw" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Lozinka" aria-label="Lozinka">
-<button id="go">Preuzmi</button>
+<button id="go">Otključaj</button>
 <div id="msg"></div>
+<a id="dl" class="dl" hidden download="scan-folder-setup.zip">Spremi ZIP</a>
 <ol hidden id="steps">
 <li>Desni klik na skinuti ZIP → Extract All.</li>
 <li>Dvoklik na POSTAVI-SCAN-FOLDER-SAMOSTALNO-v3.bat i potvrdi UAC.</li>
@@ -44,10 +47,11 @@ async function go(){
     const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:600000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
     let plain;
     try{plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);}catch(e){say('Pogrešna lozinka.',1);return;}
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([plain],{type:'application/zip'}));
-    a.download='scan-folder-setup.zip';document.body.appendChild(a);a.click();a.remove();
-    pw.value='';say('Preuzimanje je krenulo.');document.getElementById('steps').hidden=false;
+    const f=new File([plain],'scan-folder-setup.zip',{type:'application/octet-stream'});
+    const a=document.getElementById('dl');
+    if(a.href.startsWith('blob:'))URL.revokeObjectURL(a.href);
+    a.href=URL.createObjectURL(f);a.hidden=false;
+    pw.value='';say('Otključano. Klikni zeleni gumb za spremanje.');document.getElementById('steps').hidden=false;
   }catch(e){say('Greška pri preuzimanju. Pokušaj ponovno.',1);}
 }
 document.getElementById('go').onclick=go;
