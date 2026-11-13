@@ -65,6 +65,10 @@ async function unlock(){
     };
     d.append(btn,a);L.appendChild(d);
   }
+  {const d=document.createElement('div');d.className='pkg';
+   const b=document.createElement('b');b.textContent='Daljinski pristup (program, sam se ažurira)';d.appendChild(b);
+   const a=document.createElement('a');a.className='dl';a.href='daljinski/Daljinski.exe';a.download='Daljinski.exe';a.textContent='Preuzmi Daljinski.exe';
+   d.appendChild(a);L.appendChild(d);}
   L.hidden=false;say('Odaberi što želiš preuzeti. ZIP raspakiraj (desni klik → Extract All) i pokreni.');
 }
 $('go').onclick=unlock;
