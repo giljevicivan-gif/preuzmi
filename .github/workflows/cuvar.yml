@@ -1,0 +1,14 @@
+name: Cuvar (nista tajno u javnom repou)
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  cuvar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 alati/cuvar.py
+      - name: Alat za pakete se moze pokrenuti
+        run: pip install -q cryptography && python3 alati/paket.py --help > /dev/null

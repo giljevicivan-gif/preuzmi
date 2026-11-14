@@ -17,6 +17,7 @@ button,a.dl{display:block;box-sizing:border-box;width:100%;margin-top:12px;borde
 a.dl{background:var(--ok)}
 .pkg{border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px}
 .pkg b{font-size:19px}
+.ver{color:var(--muted);font-size:14px}
 #msg{min-height:24px;margin-top:12px;color:var(--muted)}
 #msg.err{color:var(--err)}
 [hidden]{display:none!important}
@@ -53,6 +54,7 @@ async function unlock(){
   for(const p of lst){
     const d=document.createElement('div');d.className='pkg';
     const b=document.createElement('b');b.textContent=p.naziv;d.appendChild(b);
+    if(p.verzija||p.datum){const v=document.createElement('div');v.className='ver';v.textContent=[p.verzija&&'verzija '+p.verzija,p.datum&&p.datum.split('-').reverse().join('.')+'.'].filter(Boolean).join(' · ');d.appendChild(v);}
     const btn=document.createElement('button');btn.textContent='Pripremi';
     const a=document.createElement('a');a.className='dl';a.hidden=true;a.textContent='Spremi '+p.datoteka;a.download=p.datoteka;
     btn.onclick=async()=>{
