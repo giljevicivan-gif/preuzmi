@@ -11,3 +11,9 @@ Datoteka scan.bin je sifrirana (AES-256-GCM, lozinka). Izvorne skripte su u priv
 - `Daljinski.zip` - isti program bez instalacije; iz njega se programi ažuriraju
 - `daljinski/verzija.json` - instalirani programi ovdje provjeravaju ima li nove verzije i sami se ažuriraju.
   Za novu verziju zamijeni `Daljinski.zip` i u `verzija.json` upiši novu verziju i `zip_sha256`.
+
+## Relej (Daljinski pristup)
+
+Na Linux serveru (Ubuntu/Debian), jedna naredba (ista naredba i za nadogradnju):
+
+    curl -fsSL https://raw.githubusercontent.com/giljevicivan-gif/preuzmi/main/relej/postavi.sh | sudo bash
